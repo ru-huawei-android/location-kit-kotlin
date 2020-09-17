@@ -12,7 +12,6 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.widget.CompoundButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -25,8 +24,14 @@ import com.huawei.dtse.locationkitv5.LocationBroadcastReceiver.Companion.EXTRA_H
 import com.huawei.dtse.locationkitv5.LocationBroadcastReceiver.Companion.EXTRA_HMS_LOCATION_CONVERSION
 import com.huawei.dtse.locationkitv5.LocationBroadcastReceiver.Companion.EXTRA_HMS_LOCATION_RESULT
 import com.huawei.dtse.locationkitv5.LocationBroadcastReceiver.Companion.REQUEST_PERIOD
+import com.huawei.dtse.locationkitv5.utils.log
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.ArrayList
+
+const val REQUEST_CODE_1 = 1
+const val REQUEST_CODE_2 = 2
+const val REQUEST_CODE_3 = 3
+const val REQUEST_CODE_4 = 4
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
@@ -95,43 +100,34 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
 
     override fun onDestroy() {
-        super.onDestroy()
         toggleRecognition.isChecked = false
+        super.onDestroy()
     }
 
 
     fun updateActivityIdentificationUI(statuses: ArrayList<ActivityIdentificationData>?) {
         statuses?.let {
-            var out = ""
-            statuses.forEach {
-                out += LocationBroadcastReceiver.statusFromCode(it.identificationActivity)
-                out += " "
+            tvRecognition.text = statuses.fold("") {out, item ->
+                out + LocationBroadcastReceiver.statusFromCode(item.identificationActivity) + " "
             }
-            tvRecognition.text = out
         } ?: run { tvRecognition.text = getString(R.string.str_activity_recognition_failed) }
     }
 
 
     fun updateActivityConversionUI(statuses: ArrayList<ActivityConversionData>?) {
         statuses?.let {
-            var out = ""
-            statuses.forEach {
-                out += LocationBroadcastReceiver.statusFromCode(it.conversionType)
-                out += " "
+            tvConversion.text = statuses.fold("") {out, item ->
+                out + LocationBroadcastReceiver.statusFromCode(item.conversionType) + " "
             }
-            tvConversion.text = out
         } ?: run { tvConversion.text = getString(R.string.str_activity_conversion_failed) }
     }
 
 
     fun updateLocationsUI(locations: ArrayList<Location>?) {
         locations?.let {
-            var out = ""
-            locations.forEach {
-                out += it.toString()
-                out += " "
+            tvLocations.text = locations.fold("") {out, item ->
+                "$out$item "
             }
-            tvLocations.text = out
         } ?: run { tvLocations.text = getString(R.string.str_activity_locations_failed) }
     }
 
@@ -172,7 +168,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         }
     }
 
-
     //-------------------------------------------
     private fun requestPermission() {
         // You must have the ACCESS_COARSE_LOCATION or ACCESS_FINE_LOCATION permission.
@@ -184,7 +179,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
             ) {
                 val strings = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
-                ActivityCompat.requestPermissions(this, strings, 1)
+                ActivityCompat.requestPermissions(this, strings, REQUEST_CODE_1)
             }
         } else {
             log("sdk >= 28 Q")
@@ -197,7 +192,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.ACCESS_COARSE_LOCATION,
                     Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-                ActivityCompat.requestPermissions(this, strings, 2)
+                ActivityCompat.requestPermissions(this, strings, REQUEST_CODE_2)
             }
         }
     }
@@ -207,14 +202,14 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             if (ActivityCompat.checkSelfPermission(this,
                     "com.huawei.hms.permission.ACTIVITY_RECOGNITION") != PackageManager.PERMISSION_GRANTED) {
                 val permissions = arrayOf("com.huawei.hms.permission.ACTIVITY_RECOGNITION")
-                ActivityCompat.requestPermissions((context as Activity?)!!, permissions, 3)
+                ActivityCompat.requestPermissions((context as Activity?)!!, permissions, REQUEST_CODE_3)
                 log("requestActivityRecognitionPermission: apply permission")
             }
         } else {
             if (ActivityCompat.checkSelfPermission(this,
                     Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED) {
                 val permissions = arrayOf(Manifest.permission.ACTIVITY_RECOGNITION)
-                ActivityCompat.requestPermissions((context as Activity?)!!, permissions, 4)
+                ActivityCompat.requestPermissions((context as Activity?)!!, permissions, REQUEST_CODE_4)
                 log("requestActivityRecognitionPermission: apply permission")
             }
         }
@@ -222,7 +217,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 1) {
+        if (requestCode == REQUEST_CODE_1) {
             if (grantResults.size > 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED &&
                 grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 log("onRequestPermissionsResult: apply LOCATION PERMISSION successful")
@@ -231,7 +226,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 log("onRequestPermissionsResult: apply LOCATION PERMISSION failed")
             }
         }
-        if (requestCode == 2) {
+        if (requestCode == REQUEST_CODE_2) {
             if (grantResults.size > 2 && grantResults[2] == PackageManager.PERMISSION_GRANTED &&
                 grantResults[0] == PackageManager.PERMISSION_GRANTED &&
                 grantResults[1] == PackageManager.PERMISSION_GRANTED) {
@@ -241,7 +236,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 log("onRequestPermissionsResult: apply ACCESS_BACKGROUND_LOCATION  failed")
             }
         }
-        if (requestCode == 3) {
+        if (requestCode == REQUEST_CODE_3) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 log("onRequestPermissionsResult: apply com.huawei.hms.permission.ACTIVITY_RECOGNITION successful")
                 startUserActivityTracking()
@@ -249,7 +244,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 log("onRequestPermissionsResult: apply com.huawei.hms.permission.ACTIVITY_RECOGNITION  failed")
             }
         }
-        if (requestCode == 4 && Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+        if (requestCode == REQUEST_CODE_4 && Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 log("onRequestPermissionsResult: apply " + Manifest.permission.ACTIVITY_RECOGNITION + " successful")
                 startUserActivityTracking()
@@ -265,4 +260,3 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 }
 
 
-fun log(message: Any?) = Log.e("#TEST", "$message")

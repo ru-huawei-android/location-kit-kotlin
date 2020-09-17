@@ -4,11 +4,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.location.Location
+import com.huawei.dtse.locationkitv5.utils.log
 import com.huawei.hms.location.*
 
 
 //::created by c7j at 30.03.2020 01:19
-open class LocationBroadcastReceiver : BroadcastReceiver() {
+class LocationBroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         log("onReceive() hms location broadcast")
@@ -18,14 +19,14 @@ open class LocationBroadcastReceiver : BroadcastReceiver() {
             val activityConversionResult = ActivityConversionResponse.getDataFromIntent(intent)
             if (activityConversionResult != null) {
                 val list =
-                        activityConversionResult.activityConversionDatas as ArrayList<ActivityConversionData>
+                    activityConversionResult.activityConversionDatas as ArrayList<ActivityConversionData>
                 deliverIntent.putParcelableArrayListExtra(EXTRA_HMS_LOCATION_CONVERSION, list)
             }
 
             val activityRecognitionResult = ActivityIdentificationResponse.getDataFromIntent(intent)
             if (activityRecognitionResult != null && MainActivity.isListenActivityIdentification) {
                 val list =
-                        activityRecognitionResult.activityIdentificationDatas as ArrayList<ActivityIdentificationData>
+                    activityRecognitionResult.activityIdentificationDatas as ArrayList<ActivityIdentificationData>
                 deliverIntent.putParcelableArrayListExtra(EXTRA_HMS_LOCATION_RECOGNITION, list)
             }
 
@@ -54,18 +55,25 @@ open class LocationBroadcastReceiver : BroadcastReceiver() {
         const val EXTRA_HMS_LOCATION_RESULT = "EXTRA_HMS_LOCATION_RESULT"
         const val EXTRA_HMS_LOCATION_AVAILABILITY = "EXTRA_HMS_LOCATION_AVAILABILITY"
         const val REQUEST_PERIOD = 5000L
+        private const val VEHICLE = 100
+        private const val BIKE = 101
+        private const val FOOT = 102
+        private const val STILL = 103
+        private const val OTHERS = 104
+        private const val TILTING = 105
+        private const val WALKING = 107
+        private const val RUNNING = 108
 
-
-        fun statusFromCode(var1: Int): String? = when (var1) {
-                100 -> "VEHICLE"
-                101 -> "BIKE"
-                102 -> "FOOT"
-                103 -> "STILL"
-                104 -> "OTHERS"
-                105 -> "TILTING"
-                107 -> "WALKING"
-                108 -> "RUNNING"
-                else -> "UNDEFINED"
+        fun statusFromCode(code: Int): String? = when (code) {
+            VEHICLE -> "VEHICLE"
+            BIKE -> "BIKE"
+            FOOT -> "FOOT"
+            STILL -> "STILL"
+            OTHERS -> "OTHERS"
+            TILTING -> "TILTING"
+            WALKING -> "WALKING"
+            RUNNING -> "RUNNING"
+            else -> "UNDEFINED"
         }
     }
 }
