@@ -12,6 +12,7 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.CompoundButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -24,20 +25,27 @@ import com.huawei.dtse.locationkitv5.LocationBroadcastReceiver.Companion.EXTRA_H
 import com.huawei.dtse.locationkitv5.LocationBroadcastReceiver.Companion.EXTRA_HMS_LOCATION_CONVERSION
 import com.huawei.dtse.locationkitv5.LocationBroadcastReceiver.Companion.EXTRA_HMS_LOCATION_RESULT
 import com.huawei.dtse.locationkitv5.LocationBroadcastReceiver.Companion.REQUEST_PERIOD
-import com.huawei.dtse.locationkitv5.utils.log
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.ArrayList
 
-const val REQUEST_CODE_1 = 1
-const val REQUEST_CODE_2 = 2
-const val REQUEST_CODE_3 = 3
-const val REQUEST_CODE_4 = 4
 
+//::created by c7j at 09.03.2020 19:32
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var activityIdentificationService: ActivityIdentificationService
     private var pendingIntent: PendingIntent? = null
+
+    private val gpsReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == ACTION_DELIVER_LOCATION) {
+                updateActivityIdentificationUI(intent.extras?.getParcelableArrayList(EXTRA_HMS_LOCATION_RECOGNITION))
+                updateActivityConversionUI(intent.extras?.getParcelableArrayList(EXTRA_HMS_LOCATION_CONVERSION))
+                updateLocationsUI(intent.extras?.getParcelableArrayList(EXTRA_HMS_LOCATION_RESULT))
+            }
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,17 +85,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             }
         } catch (e: Exception) {
             log("exception: $e")
-        }
-    }
-
-
-    private val gpsReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action == ACTION_DELIVER_LOCATION) {
-                updateActivityIdentificationUI(intent.extras?.getParcelableArrayList(EXTRA_HMS_LOCATION_RECOGNITION))
-                updateActivityConversionUI(intent.extras?.getParcelableArrayList(EXTRA_HMS_LOCATION_CONVERSION))
-                updateLocationsUI(intent.extras?.getParcelableArrayList(EXTRA_HMS_LOCATION_RESULT))
-            }
         }
     }
 
@@ -179,7 +176,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
             ) {
                 val strings = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
-                ActivityCompat.requestPermissions(this, strings, REQUEST_CODE_1)
+                ActivityCompat.requestPermissions(this, strings, REQUEST_CODE_LOCATION_SDK27)
             }
         } else {
             log("sdk >= 28 Q")
@@ -192,7 +189,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.ACCESS_COARSE_LOCATION,
                     Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-                ActivityCompat.requestPermissions(this, strings, REQUEST_CODE_2)
+                ActivityCompat.requestPermissions(this, strings, REQUEST_CODE_LOCATION_SDK28)
             }
         }
     }
@@ -202,14 +199,14 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             if (ActivityCompat.checkSelfPermission(this,
                     "com.huawei.hms.permission.ACTIVITY_RECOGNITION") != PackageManager.PERMISSION_GRANTED) {
                 val permissions = arrayOf("com.huawei.hms.permission.ACTIVITY_RECOGNITION")
-                ActivityCompat.requestPermissions((context as Activity?)!!, permissions, REQUEST_CODE_3)
+                ActivityCompat.requestPermissions((context as Activity?)!!, permissions, REQUEST_CODE_ACTIVITY_RECOGNITION_SDK27)
                 log("requestActivityRecognitionPermission: apply permission")
             }
         } else {
             if (ActivityCompat.checkSelfPermission(this,
                     Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED) {
                 val permissions = arrayOf(Manifest.permission.ACTIVITY_RECOGNITION)
-                ActivityCompat.requestPermissions((context as Activity?)!!, permissions, REQUEST_CODE_4)
+                ActivityCompat.requestPermissions((context as Activity?)!!, permissions, REQUEST_CODE_ACTIVITY_RECOGNITION_SDK28)
                 log("requestActivityRecognitionPermission: apply permission")
             }
         }
@@ -217,7 +214,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_CODE_1) {
+        if (requestCode == REQUEST_CODE_LOCATION_SDK27) {
             if (grantResults.size > 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED &&
                 grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                 log("onRequestPermissionsResult: apply LOCATION PERMISSION successful")
@@ -226,7 +223,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 log("onRequestPermissionsResult: apply LOCATION PERMISSION failed")
             }
         }
-        if (requestCode == REQUEST_CODE_2) {
+        if (requestCode == REQUEST_CODE_LOCATION_SDK28) {
             if (grantResults.size > 2 && grantResults[2] == PackageManager.PERMISSION_GRANTED &&
                 grantResults[0] == PackageManager.PERMISSION_GRANTED &&
                 grantResults[1] == PackageManager.PERMISSION_GRANTED) {
@@ -236,7 +233,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 log("onRequestPermissionsResult: apply ACCESS_BACKGROUND_LOCATION  failed")
             }
         }
-        if (requestCode == REQUEST_CODE_3) {
+        if (requestCode == REQUEST_CODE_ACTIVITY_RECOGNITION_SDK27) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 log("onRequestPermissionsResult: apply com.huawei.hms.permission.ACTIVITY_RECOGNITION successful")
                 startUserActivityTracking()
@@ -244,7 +241,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 log("onRequestPermissionsResult: apply com.huawei.hms.permission.ACTIVITY_RECOGNITION  failed")
             }
         }
-        if (requestCode == REQUEST_CODE_4 && Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+        if (requestCode == REQUEST_CODE_ACTIVITY_RECOGNITION_SDK28 && Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 log("onRequestPermissionsResult: apply " + Manifest.permission.ACTIVITY_RECOGNITION + " successful")
                 startUserActivityTracking()
@@ -255,8 +252,13 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     companion object {
+        const val REQUEST_CODE_LOCATION_SDK27 = 1
+        const val REQUEST_CODE_LOCATION_SDK28 = 2
+        const val REQUEST_CODE_ACTIVITY_RECOGNITION_SDK27 = 3
+        const val REQUEST_CODE_ACTIVITY_RECOGNITION_SDK28 = 4
+
         var isListenActivityIdentification = true
     }
 }
 
-
+fun log(message: Any?) = Log.e("#TEST", "$message")

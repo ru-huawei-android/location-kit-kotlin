@@ -8,19 +8,12 @@ android {
 
     defaultConfig {
         applicationId "com.huawei.dtse.locationkitv5"
-        minSdkVersion 26
+        minSdkVersion 21
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
     }
 
     signingConfigs {
@@ -48,14 +41,23 @@ android {
 }
 
 dependencies {
+    // Нужно добавить SHA256 сертификата которым вы подписываете приложение в вашем Web-интерфейсе
+    // Подробный гайд здесь: https://developer.huawei.com/consumer/en/doc/development/HMS-Guides/iap-configuring-appGallery-connect
+
+    // Не забудьте включить соответствующие Kits в вашем Web-интерфейсе
+    // Подробный гайд здесь: https://developer.huawei.com/consumer/en/service/hms/catalog/AGCHelp.html?page=AGC_appGalleryConnect_associated_service
+    // После включения Kits и добавления SHA256, скачайте agconnect-services.json и положите его в проект
+
+    // Если Android studio не видит ваше Huawei устройство - переключите его в режим соединения MTP (передача файлов)
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.3.1'
+    implementation 'androidx.core:core-ktx:1.3.2'
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
 
-    //Huawei
     implementation 'com.huawei.hms:location:5.0.0.301'
+
+    // Если вы используете proguard, правила можно скопировать из файла proguard-project.txt
 }
 
 //Huawei plugin

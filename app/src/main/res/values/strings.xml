@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">LocationKitV5</string>
+    <string name="app_name">HMS LocationKit</string>
 
     <string name="get_last_init">push the button</string>
     <string name="get_last_searching">searching…</string>
