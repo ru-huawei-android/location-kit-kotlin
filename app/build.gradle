@@ -17,6 +17,9 @@ android {
     }
 
     signingConfigs {
+        //  Для подписи можно использовать тот же сертификат что и в Google Play.
+        //  Однако если вы хотите избежать возможности кросс-обновлений из 2х магазинов,
+        //  лучше создать новый сертификат и подписать им
         release {
             storeFile file('HuaweiSampleKey.jks')
             storePassword "HuaweiSampleKey"
