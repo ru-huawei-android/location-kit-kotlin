@@ -41,16 +41,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     private val gpsReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == ACTION_DELIVER_LOCATION) {
-                updateActivityIdentificationUI(
-                    intent.extras?.getParcelableArrayList(
-                        EXTRA_HMS_LOCATION_RECOGNITION
-                    )
-                )
-                updateActivityConversionUI(
-                    intent.extras?.getParcelableArrayList(
-                        EXTRA_HMS_LOCATION_CONVERSION
-                    )
-                )
+                updateActivityIdentificationUI(intent.extras?.getParcelableArrayList(EXTRA_HMS_LOCATION_RECOGNITION))
+                updateActivityConversionUI(intent.extras?.getParcelableArrayList(EXTRA_HMS_LOCATION_CONVERSION))
                 updateLocationsUI(intent.extras?.getParcelableArrayList(EXTRA_HMS_LOCATION_RESULT))
             }
         }
@@ -126,11 +118,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             tvConversion.text = statuses.fold("") { out, item ->
                 out + LocationBroadcastReceiver.statusFromCode(item.conversionType) + " "
             }
-
-            it.forEach { item ->
-                Toast.makeText(this, LocationBroadcastReceiver.statusFromCode(item.conversionType), Toast.LENGTH_SHORT).show()
-            }
-
         } ?: run { tvConversion.text = getString(R.string.str_activity_conversion_failed) }
     }
 
