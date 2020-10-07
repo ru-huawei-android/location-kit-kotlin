@@ -66,8 +66,8 @@ class LocationBroadcastReceiver : BroadcastReceiver() {
             ActivityIdentificationData.TILTING -> "TILTING"
             ActivityIdentificationData.WALKING -> "WALKING"
             ActivityIdentificationData.RUNNING -> "RUNNING"
-            ActivityConversionInfo.EXIT_ACTIVITY_CONVERSION -> "EXIT FROM STILL ACTIVITY"
-            ActivityConversionInfo.ENTER_ACTIVITY_CONVERSION -> "ENTER TO STILL ACTIVITY"
+            ActivityConversionInfo.EXIT_ACTIVITY_CONVERSION -> "OUT FROM STILL ACTIVITY"
+            ActivityConversionInfo.ENTER_ACTIVITY_CONVERSION -> "IN STILL ACTIVITY"
             else -> "UNDEFINED"
         }
     }

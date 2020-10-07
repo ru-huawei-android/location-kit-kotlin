@@ -14,7 +14,6 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.CompoundButton
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.huawei.dtse.locationkitv5.LocationBroadcastReceiver.Companion.ACTION_DELIVER_LOCATION
@@ -38,11 +37,22 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     private lateinit var activityIdentificationService: ActivityIdentificationService
     private var pendingIntent: PendingIntent? = null
 
+    private var conversionText: String? = null
+    private var recognitionText: String? = null
+
     private val gpsReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == ACTION_DELIVER_LOCATION) {
-                updateActivityIdentificationUI(intent.extras?.getParcelableArrayList(EXTRA_HMS_LOCATION_RECOGNITION))
-                updateActivityConversionUI(intent.extras?.getParcelableArrayList(EXTRA_HMS_LOCATION_CONVERSION))
+                updateActivityIdentificationUI(
+                    intent.extras?.getParcelableArrayList(
+                        EXTRA_HMS_LOCATION_RECOGNITION
+                    )
+                )
+                updateActivityConversionUI(
+                    intent.extras?.getParcelableArrayList(
+                        EXTRA_HMS_LOCATION_CONVERSION
+                    )
+                )
                 updateLocationsUI(intent.extras?.getParcelableArrayList(EXTRA_HMS_LOCATION_RESULT))
             }
         }
@@ -53,6 +63,9 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         super.onCreate(savedInstanceState)
         supportActionBar?.hide()
         requestPermission()
+
+        conversionText = getString(R.string.str_activity_conversion_failed)
+        recognitionText = getString(R.string.str_activity_recognition_failed)
 
         pendingIntent = getPendingIntent()
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
@@ -106,19 +119,29 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     fun updateActivityIdentificationUI(statuses: ArrayList<ActivityIdentificationData>?) {
         statuses?.let {
-            tvRecognition.text = statuses.fold("") { out, item ->
-                out + LocationBroadcastReceiver.statusFromCode(item.identificationActivity) + " "
+            val out = StringBuilder()
+            for (item in statuses) {
+                out.append(LocationBroadcastReceiver.statusFromCode(item.identificationActivity))
+                recognitionText = LocationBroadcastReceiver.statusFromCode(item.identificationActivity)
             }
-        } ?: run { tvRecognition.text = getString(R.string.str_activity_recognition_failed) }
+            tvRecognition.text = out.toString()
+        } ?: run {
+            tvRecognition.text = recognitionText
+        }
     }
 
 
     fun updateActivityConversionUI(statuses: ArrayList<ActivityConversionData>?) {
         statuses?.let {
-            tvConversion.text = statuses.fold("") { out, item ->
-                out + LocationBroadcastReceiver.statusFromCode(item.conversionType) + " "
+            val out = StringBuilder()
+            for (item in statuses) {
+                out.append(LocationBroadcastReceiver.statusFromCode(item.conversionType))
+                conversionText = LocationBroadcastReceiver.statusFromCode(item.conversionType)
             }
-        } ?: run { tvConversion.text = getString(R.string.str_activity_conversion_failed) }
+            tvConversion.text = out.toString()
+        } ?: run {
+            tvConversion.text = conversionText
+        }
     }
 
 
