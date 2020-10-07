@@ -14,12 +14,12 @@ class LocationBroadcastReceiver : BroadcastReceiver() {
         val deliverIntent = Intent(ACTION_DELIVER_LOCATION)
         val action = intent.action
         if (action == ACTION_PROCESS_LOCATION) {
-//            val activityConversionResult = ActivityConversionResponse.getDataFromIntent(intent)
-//            if (activityConversionResult != null) {
-//                val list =
-//                    activityConversionResult.activityConversionDatas as ArrayList<ActivityConversionData>
-//                deliverIntent.putParcelableArrayListExtra(EXTRA_HMS_LOCATION_CONVERSION, list)
-//            }
+            val activityConversionResult = ActivityConversionResponse.getDataFromIntent(intent)
+            if (activityConversionResult != null) {
+                val list =
+                    activityConversionResult.activityConversionDatas as ArrayList<ActivityConversionData>
+                deliverIntent.putParcelableArrayListExtra(EXTRA_HMS_LOCATION_CONVERSION, list)
+            }
 
             val activityRecognitionResult = ActivityIdentificationResponse.getDataFromIntent(intent)
             if (activityRecognitionResult != null && MainActivity.isListenActivityIdentification) {
@@ -66,6 +66,8 @@ class LocationBroadcastReceiver : BroadcastReceiver() {
             ActivityIdentificationData.TILTING -> "TILTING"
             ActivityIdentificationData.WALKING -> "WALKING"
             ActivityIdentificationData.RUNNING -> "RUNNING"
+            ActivityConversionInfo.EXIT_ACTIVITY_CONVERSION -> "EXIT FROM STILL ACTIVITY"
+            ActivityConversionInfo.ENTER_ACTIVITY_CONVERSION -> "ENTER TO STILL ACTIVITY"
             else -> "UNDEFINED"
         }
     }
