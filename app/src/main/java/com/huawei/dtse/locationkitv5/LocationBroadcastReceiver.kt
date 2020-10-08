@@ -27,19 +27,6 @@ class LocationBroadcastReceiver : BroadcastReceiver() {
                     activityRecognitionResult.activityIdentificationDatas as ArrayList<ActivityIdentificationData>
                 deliverIntent.putParcelableArrayListExtra(EXTRA_HMS_LOCATION_RECOGNITION, list)
             }
-
-//            if (LocationResult.hasResult(intent)) {
-//                val result = LocationResult.extractResult(intent)
-//                if (result != null) {
-//                    val list = result.locations as ArrayList<Location>
-//                    deliverIntent.putParcelableArrayListExtra(EXTRA_HMS_LOCATION_RESULT, list)
-//                }
-//            }
-
-//            if (LocationAvailability.hasLocationAvailability(intent)) {
-//                val locationAvailability = LocationAvailability.extractLocationAvailability(intent)
-//                deliverIntent.putExtra(EXTRA_HMS_LOCATION_AVAILABILITY, locationAvailability?.isLocationAvailable == true)
-//            }
         }
         context.sendBroadcast(deliverIntent)
     }
@@ -51,8 +38,6 @@ class LocationBroadcastReceiver : BroadcastReceiver() {
 
         const val EXTRA_HMS_LOCATION_RECOGNITION = "EXTRA_HMS_LOCATION_RECOGNITION"
         const val EXTRA_HMS_LOCATION_CONVERSION = "EXTRA_HMS_LOCATION_CONVERSION"
-        const val EXTRA_HMS_LOCATION_RESULT = "EXTRA_HMS_LOCATION_RESULT"
-        const val EXTRA_HMS_LOCATION_AVAILABILITY = "EXTRA_HMS_LOCATION_AVAILABILITY"
 
         const val REQUEST_PERIOD = 5000L
 

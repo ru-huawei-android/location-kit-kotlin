@@ -20,7 +20,6 @@ import com.huawei.dtse.locationkitv5.LocationBroadcastReceiver.Companion.ACTION_
 import com.huawei.dtse.locationkitv5.LocationBroadcastReceiver.Companion.ACTION_PROCESS_LOCATION
 import com.huawei.dtse.locationkitv5.LocationBroadcastReceiver.Companion.EXTRA_HMS_LOCATION_CONVERSION
 import com.huawei.dtse.locationkitv5.LocationBroadcastReceiver.Companion.EXTRA_HMS_LOCATION_RECOGNITION
-import com.huawei.dtse.locationkitv5.LocationBroadcastReceiver.Companion.EXTRA_HMS_LOCATION_RESULT
 import com.huawei.dtse.locationkitv5.LocationBroadcastReceiver.Companion.REQUEST_PERIOD
 import com.huawei.hmf.tasks.OnSuccessListener
 import com.huawei.hmf.tasks.Task
@@ -53,7 +52,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                         EXTRA_HMS_LOCATION_CONVERSION
                     )
                 )
-                updateLocationsUI(intent.extras?.getParcelableArrayList(EXTRA_HMS_LOCATION_RESULT))
             }
         }
     }
@@ -77,6 +75,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             requestActivityRecognitionPermission(this)
             if (enabled) startUserActivityTracking() else stopUserActivityTracking()
         }
+
+        getLocationAvailability()
     }
 
 
@@ -145,19 +145,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
 
-    fun updateLocationsUI(locations: ArrayList<Location>?) {
-        locations?.let {
-            tvLocations.text = locations.fold("") { out, item ->
-                "$out$item "
-            }
-        } ?: run { tvLocations.text = getString(R.string.str_activity_locations_failed) }
-    }
-
-
     private fun startUserActivityTracking() {
         registerReceiver(gpsReceiver, IntentFilter(ACTION_DELIVER_LOCATION))
         requestActivityUpdates(REQUEST_PERIOD)
-        startConversionInfoUpdates()
+        requestConversionInfo()
     }
 
 
@@ -195,7 +186,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         }
     }
 
-    private fun startConversionInfoUpdates() {
+    private fun makeConversionInfoUpdatesRequest(): ActivityConversionRequest {
         val activityConversionInfo1 = ActivityConversionInfo(
             ActivityIdentificationData.STILL,
             ActivityConversionInfo.ENTER_ACTIVITY_CONVERSION
@@ -211,12 +202,13 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         val request = ActivityConversionRequest()
         request.activityConversions = activityConversionInfoList
 
-        requestConversionInfo(request)
+        return request
     }
 
-    private fun requestConversionInfo(request: ActivityConversionRequest) {
+    private fun requestConversionInfo() {
         val task =
-            activityIdentificationService.createActivityConversionUpdates(request, pendingIntent)
+            activityIdentificationService
+                .createActivityConversionUpdates(makeConversionInfoUpdatesRequest(), pendingIntent)
         task.addOnSuccessListener {
             log("createActivityConversionUpdates onSuccess")
         }.addOnFailureListener {
@@ -232,6 +224,22 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             .addOnFailureListener {
                 log("deleteActivityConversionUpdates onFailure: ${it.message}")
             }
+    }
+
+    /**
+     * Obtaining Location Availability
+     */
+    private fun getLocationAvailability() {
+        try {
+            val locationAvailability = fusedLocationProviderClient.locationAvailability
+            locationAvailability.addOnSuccessListener {
+                it?. let {
+                    log("getLocationAvailability onSuccess: $it")
+                }
+            }.addOnFailureListener { e -> log("getLocationAvailability onFailure: " + e.message) }
+        } catch (e: Exception) {
+            log("getLocationAvailability exception: ${e.message}")
+        }
     }
 
     //-------------------------------------------
