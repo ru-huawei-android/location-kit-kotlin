@@ -48,7 +48,6 @@ class LocationBroadcastReceiver : BroadcastReceiver() {
             ActivityIdentificationData.FOOT -> "FOOT"
             ActivityIdentificationData.STILL -> "STILL"
             ActivityIdentificationData.OTHERS -> "OTHERS"
-            ActivityIdentificationData.TILTING -> "TILTING"
             ActivityIdentificationData.WALKING -> "WALKING"
             ActivityIdentificationData.RUNNING -> "RUNNING"
             ActivityConversionInfo.EXIT_ACTIVITY_CONVERSION -> "OUT FROM STILL ACTIVITY"
